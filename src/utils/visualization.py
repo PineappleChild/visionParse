@@ -151,3 +151,48 @@ def visualize_clusters_of_image(
 
     plt.tight_layout()
     plt.show()
+
+def visualize_segmentation_of_image(
+                                images: tuple,
+                                ) -> None:
+
+    num_images = len(images)
+    num_cols = int(np.ceil(np.sqrt(num_images)))
+    num_rows = int(np.ceil(num_images / num_cols))
+
+    fig_scale = 4
+
+    fig, axes = plt.subplots(
+        num_rows, num_cols * 2,
+        figsize=(num_cols * 2 * fig_scale, num_rows * fig_scale)
+    )
+
+    if num_rows == 1:
+        axes = axes[np.newaxis, :]
+
+    if num_cols == 1:
+        axes = axes[:, np.newaxis]
+
+    for idx, (mask, image) in enumerate(images):
+
+        image = denormalize_imagenet(image)
+        
+        # print("image shape:", image.shape, "mask shape:", mask.shape)
+
+        row = idx // num_cols
+        col = (idx % num_cols) * 2
+
+        overlay = np.zeros((*mask.shape, 4), dtype=np.float32)
+        overlay[mask] = [1.0, 0.0, 0.0, 0.75]
+
+        axes[row, col].imshow(image)
+        axes[row, col].set_title("Original")
+        axes[row, col].axis("off")
+
+        axes[row, col + 1].imshow(image)
+        axes[row, col + 1].imshow(overlay)
+        axes[row, col + 1].set_title("Segmentation Mask")
+        axes[row, col + 1].axis("off")
+
+    plt.tight_layout()
+    plt.show()

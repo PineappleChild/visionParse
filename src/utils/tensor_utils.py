@@ -8,3 +8,11 @@ def denormalize_imagenet(
     std  = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
     img = torch.clamp(image_tensor.cpu() * std + mean, 0, 1)
     return img.permute(1, 2, 0).numpy()
+
+def mask_to_box_sam(
+                    mask
+                    ):
+    
+    ys, xs = np.where(mask)
+    
+    return [xs.min(), ys.min(), xs.max(), ys.max()]

@@ -35,3 +35,25 @@ def estimate_optimal_num_clusters(
     print(f"cluster_range={min_clusters},{max_clusters}, selected_num_clusters={best_num_clusters}")
 
     return best_num_clusters
+
+def get_target_clusters(
+                        clusters_dict: list,
+                        classified_clusters: list
+                        ) -> list:
+    
+    target_clusters = []
+
+    for idx in range(clusters_dict["num_clusters"]):
+        if classified_clusters[idx][1][0] != "target":
+            continue
+
+        target_clusters.append(idx)
+
+    target_cluster_dict = {
+        "clusters": clusters_dict["clusters"],
+        "clusters_map_up": clusters_dict["clusters_map"],
+        "cluster_centers" : clusters_dict["centers"],
+        "target_clusters_idx": target_clusters
+    }
+
+    return target_cluster_dict

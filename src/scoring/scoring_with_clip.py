@@ -15,7 +15,6 @@ def score_cluster_with_clip(
                         ):
     
     image = np.clip(image.astype(np.float32), 0.0, 1.0)
-    
     mask = np.array(mask).squeeze(0).astype(bool)
 
     ys, xs = np.where(mask)
@@ -38,7 +37,8 @@ def score_cluster_with_clip(
     crop = image[y_min:y_max+1, x_min:x_max+1].copy()
     seg_crop = mask[y_min:y_max+1, x_min:x_max+1]
     
-    crop[~seg_crop] = 1.0
+    bg_color = image.mean(axis=(0,1))
+    crop[~seg_crop] = bg_color
 
     pil_crop = Image.fromarray((crop * 255).astype(np.uint8))
 
@@ -82,6 +82,23 @@ def create_CLIP_score_arr(
                             background_prompts,
                             device
                             )
-        
         cluster_scores_CLIP.append((idx, score_for_mask_cluster))
+        
     return cluster_scores_CLIP
+
+def classify_clusters(
+                    clip_scores: list,
+                    min_threshold: float = 0.5,
+                    margin_from_best: float = 0.15
+                    ) -> list:
+    
+    clip_arr = np.array([s for _, s in clip_scores])
+    best = clip_arr.max()
+
+    print(f"[THRESHOLD] {best - margin_from_best}")
+
+    results = [
+        "target" if (s >= min_threshold and s >= best - margin_from_best) else "background"
+        for s in clip_arr
+    ]
+    return [(i, (results[i], round(clip_arr[i], 4))) for i in range(len(results))]

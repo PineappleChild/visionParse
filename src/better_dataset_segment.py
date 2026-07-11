@@ -10,7 +10,9 @@ from pipeline.pipeline import Pipeline
 #smoother and less chunky would be good, also sometimes it bleeds in and causes it to change the scores for the background and 
 #mixed in target area resulting in a poor score
 
-path_to_train = Path(r"E:\featureLearningJourney\LatentSpaceFruitsAndVeggies\validation")
+path_to_train = Path(r"E:\featureLearningJourney\LatentSpaceFruitsAndVeggies\train")
+
+sam_checkpoint_path = Path(r"E:\featureLearningJourney\LatentSpaceFruitsAndVeggies\auto_segment_dataset\sam_vit_b_01ec64.pth")
 
 image_size = 980
 #min 2 for now
@@ -34,5 +36,5 @@ if __name__ == "__main__":
         prefetch_factor=2
     )
 
-    pipeline = Pipeline(data_loader=dataloader_train, device=device)
+    pipeline = Pipeline(sam_checkpoint_path=sam_checkpoint_path, data_loader=dataloader_train, device=device)
     pipeline.run()

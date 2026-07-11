@@ -31,7 +31,7 @@ def extract_dinov2_patch_features(
         "features": features,
         "features_h": features_h,
         "features_w": features_w,
-        "orig_image":image,
+        "orig_image": image,
         "cls_token": cls_token
     }
     # print(features.shape)
