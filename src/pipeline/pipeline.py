@@ -16,13 +16,7 @@ from utils.visualization import visualize_pca_of_images, visualize_clusters_of_i
 
 from segmentation.segment_sam import segmenting_with_sam
 
-
-from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
-from pycocotools import mask as mask_utils
-
-
 import gc
-import cv2
 import numpy as np
 import torch
 
@@ -87,7 +81,7 @@ class Pipeline:
 
                     batch_results["batch_of_masks_for_segmentation"].append((final_mask, feature_patch_info_dict["orig_image"]))
 
-            self.result.append((batch_results["batch_idx"], batch_results["batch_of_masks_for_segmentation"]))
+            self.result.append(batch_results["batch_of_masks_for_segmentation"])
 
             # visualize_clusters_of_image(batch_results["batch_of_images_for_clustering"], batch_results["clusters_scores_cls"])
 
@@ -99,7 +93,6 @@ class Pipeline:
 
             del batch_results
             gc.collect()
-            torch.cuda.empty_cache()
 
             #to cut batch off early for testing
             # print(f"Donw with batch {batch_idx}")
