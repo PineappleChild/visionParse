@@ -42,18 +42,20 @@ def get_target_clusters(
                         ) -> list:
     
     target_clusters = []
+    background_clusters = []
 
     for idx in range(clusters_dict["num_clusters"]):
         if classified_clusters[idx][1][0] != "target":
-            continue
+            background_clusters.append(idx)
+        else:
+            target_clusters.append(idx)
 
-        target_clusters.append(idx)
-
-    target_cluster_dict = {
+    classified_cluster_dict = {
         "clusters": clusters_dict["clusters"],
         "clusters_map_up": clusters_dict["clusters_map"],
         "cluster_centers" : clusters_dict["centers"],
-        "target_clusters_idx": target_clusters
+        "target_clusters_idx": target_clusters,
+        "background_clusters_idx": background_clusters
     }
 
-    return target_cluster_dict
+    return classified_cluster_dict

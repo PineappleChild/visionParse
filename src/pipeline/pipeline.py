@@ -52,7 +52,9 @@ class Pipeline:
             }
 
             for idx, image in enumerate(images):
+                
                 print(f"--------------[IMAGE {idx + 1}]--------------")
+                print(len(batch_results["batch_of_images_for_pca"]))
                 denormalize_image = denormalize_imagenet(image)
 
                 with torch.no_grad():
@@ -76,16 +78,16 @@ class Pipeline:
 
                     classified_clusters = classify_clusters(clip_scores=scores_clip)
 
-                    targets = get_target_clusters(clusters_dict=clusters_dict, classified_clusters=classified_clusters)
+                    classified_clusters = get_target_clusters(clusters_dict=clusters_dict, classified_clusters=classified_clusters)
 
                     print(classified_clusters)
-                    print(targets["target_clusters_idx"])
+                    print(classified_clusters["target_clusters_idx"])
 
-                    final_mask = segmenting_with_sam(denormalize_image, targets, self.sam)
+                    final_mask = segmenting_with_sam(denormalize_image, classified_clusters, self.sam)
 
                     batch_results["batch_of_masks_for_segmentation"].append((final_mask, feature_patch_info_dict["orig_image"]))
 
-            self.result.append(batch_results)
+            self.result.append((batch_results["batch_idx"], batch_results["batch_of_masks_for_segmentation"]))
 
             # visualize_clusters_of_image(batch_results["batch_of_images_for_clustering"], batch_results["clusters_scores_cls"])
 
@@ -94,6 +96,10 @@ class Pipeline:
             visualize_segmentation_of_image(batch_results["batch_of_masks_for_segmentation"])
 
             # visualize_pca_of_images(batch_results["batch_of_images_for_pca"])
+
+            del batch_results
+            gc.collect()
+            torch.cuda.empty_cache()
 
             #to cut batch off early for testing
             # print(f"Donw with batch {batch_idx}")

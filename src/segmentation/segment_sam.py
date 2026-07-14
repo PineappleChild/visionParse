@@ -4,19 +4,23 @@ import numpy as np
 
 def segmenting_with_sam(
                         original_image: np.ndarray,
-                        targets: list,
+                        classified_clusters: list,
                         sam_model
                         ):
     
-    target_mask = np.zeros_like(np.asarray(targets["clusters"][0][0]), dtype=np.uint8)
-    for cluster in targets["clusters"]:
-        target_mask |= cluster[0].astype(np.uint8)
+    
+    target_mask = np.zeros_like(np.asarray(classified_clusters["clusters"][0][0]), dtype=np.uint8)
+    background_mask = np.zeros_like(np.asarray(classified_clusters["clusters"][0][0]), dtype=np.uint8)
+
+    for cluster_idx in range(len(classified_clusters["clusters"])):
+        if cluster_idx in classified_clusters["target_clusters_idx"]:
+            target_mask |= classified_clusters["clusters"][cluster_idx][0].astype(np.uint8)
+        else:
+            background_mask |= classified_clusters["clusters"][cluster_idx][0].astype(np.uint8)
 
     kernel = np.ones((7,7), np.uint8)
-    clean = cv2.morphologyEx(target_mask, cv2.MORPH_OPEN, kernel)
-    clean = cv2.morphologyEx(clean, cv2.MORPH_CLOSE, kernel)
 
-    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(clean, connectivity=8)
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(target_mask, connectivity=8)
 
     total_area = target_mask.size
     min_area = max(50, int(0.0025 * total_area))
@@ -52,7 +56,10 @@ def segmenting_with_sam(
         #gotta change this, sample neg points from the background classified clusters, rn its trying to get something outside
         #of the target clusters, might be causing the problem with a large target getting segmented rather than a smaller background
         comp_dilated = cv2.dilate(comp_mask, kernel, iterations=3)
-        local_bg = (1 - comp_dilated[y0:y1, x0:x1])
+        local_bg = (
+            background_mask[y0:y1, x0:x1] &
+            (~comp_dilated[y0:y1, x0:x1].astype(bool))
+        )
         bg_ys, bg_xs = np.where(local_bg)
         n_neg = min(5, len(bg_ys))
 

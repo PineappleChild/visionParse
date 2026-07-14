@@ -64,6 +64,7 @@ def visualize_pca_of_images(
 
     plt.tight_layout()
     plt.show()
+    plt.close()
 
 def visualize_clusters_of_image(
                                 images: tuple, 
@@ -151,6 +152,7 @@ def visualize_clusters_of_image(
 
     plt.tight_layout()
     plt.show()
+    plt.close()
 
 def visualize_segmentation_of_image(
                                 images: tuple,
@@ -196,3 +198,4 @@ def visualize_segmentation_of_image(
 
     plt.tight_layout()
     plt.show()
+    plt.close()
